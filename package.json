@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
+    "micro-bot": "^2.5.3",
     "moment": "^2.29.1",
     "telegraf": "^3.38.0"
   },

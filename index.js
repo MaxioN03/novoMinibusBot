@@ -6,7 +6,8 @@ const {DIRECTIONS, STATIONS, ONE_MINUTE, MAX_VISIBILITY_DAYS} = require('./js/co
 const {getMessageWithTrips, isMessageUserAllowed, getDirectionString} = require('./js/utils');
 const {TRACK_KEY, DIRECTION_KEY, DIRECTION_REGEX, DATE_KEY} = require('./js/commands');
 
-const bot = new Telegraf(process.env.BOT_TOKEN || TOKEN);
+const {Composer} = require('micro-bot');
+const bot = new Composer();
 
 let timer = null;
 let direction = null;
@@ -93,47 +94,4 @@ bot.command('stop', (ctx) => {
   }
 });
 
-bot.launch();
-
-// const {Composer} = require('micro-bot');
-// const bot = new Composer();
-// const COMMON_CHANNEL_LINK = 'https://t.me/novapohliad';
-//
-// bot.start((ctx) => ctx.reply(`Здравствуйте! Пришлите ваше сообщение.\n\n`
-//     + `Для того, чтобы узнать подробнее о боте, введите команду /help\n\n`
-//     + `Бот анонимный, это значит, что мы не можем ответить на присланное вами сообщение, потому что его автор нам неизвестен\n\n`
-//     + `Основной канал: ${COMMON_CHANNEL_LINK}`));
-// bot.help((ctx) => ctx.reply(`Данный бот принимает ваши сообщения для редакции.\n\n`
-//     + `Если у вас есть новости, фото, предложения или что-то ещё, прислыайте их сюда\n\n`
-//     + `Бот анонимный, это значит, что мы не можем ответить на присланное вами сообщение, потому что его автор нам неизвестен\n\n`
-//     + `Основной канал: ${COMMON_CHANNEL_LINK}`));
-//
-// bot.start((ctx) => ctx.reply(`Здравствуйте! Пришлите ваше сообщение.\n\n`))
-//
-// bot.on([
-//     'message',
-//     'edited_message',
-//     'channel_post',
-//     'edited_channel_post',
-//     'inline_query',
-//     'shipping_query',
-//     'pre_checkout_query',
-//     'chosen_inline_result'], async (ctx, next) => {
-//
-//     ctx.telegram.sendMessage(process.env.GROUP_ID, `Сообщение от подписчика:`)
-//         .then(() => {
-//             ctx.telegram.sendCopy(process.env.GROUP_ID, ctx.update.message)
-//                 .then(() => {
-//                     ctx.reply('Спасибо, ваше сообщение принято!');
-//                 })
-//                 .catch(error => {
-//                     ctx.reply('Произошла ошибка, попробуйте ещё раз');
-//                     console.log('Error: \n\n', error, '\n\nContext: \n\n', ctx);
-//                     ctx.telegram.sendMessage(process.env.GROUP_ID, `❗️❗️❗️У пользователя возникла ошибка, смотреть в логах`)
-//                 })
-//         });
-//
-//     await next();
-// });
-//
-// module.exports = bot;
+module.exports = bot;
