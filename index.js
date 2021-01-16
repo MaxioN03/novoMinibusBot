@@ -6,7 +6,7 @@ const {DIRECTIONS, STATIONS, ONE_MINUTE, MAX_VISIBILITY_DAYS} = require('./js/co
 const {getMessageWithTrips, isMessageUserAllowed, getDirectionString} = require('./js/utils');
 const {TRACK_KEY, DIRECTION_KEY, DIRECTION_REGEX, DATE_KEY} = require('./js/commands');
 
-const bot = new Telegraf(process.env.BOT_TOKEN || TOKEN);
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 let timer = null;
 let direction = null;

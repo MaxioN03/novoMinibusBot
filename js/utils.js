@@ -1,5 +1,7 @@
 const {AGENTS, DIRECTIONS, STATIONS} = require('./constants');
 
+const ALLOWED_USERS = process.env.ALLOWED_USERS || [];
+
 //stations: [string, string]
 const getDirection = (stations) => {
   let formattedStations = stations.map(station => station.trim().toLowerCase());
