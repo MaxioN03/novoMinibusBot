@@ -3,6 +3,8 @@ const moment = require('moment');
 const {AGENTS, DIRECTIONS} = require('./constants');
 const {getDirection} = require('./utils');
 
+const ALFA_BUS_ARROW_TRIP_SPLITTER = ' -> ';
+
 //(direction: DIRECTIONS, date: string)
 const getAlfaBusTrips = (direction, date) => {
   const params = new URLSearchParams();
@@ -22,7 +24,7 @@ const getAlfaBusTrips = (direction, date) => {
 
         return trips.filter(trip => {
           let {date: tripDate, route, seats, datetime} = trip;
-          let tripStations = route.split(' -> ');
+          let tripStations = route.split(ALFA_BUS_ARROW_TRIP_SPLITTER);
           let tripDirection = getDirection(tripStations);
 
           return tripDirection === direction
@@ -38,7 +40,7 @@ const getAlfaBusTrips = (direction, date) => {
             })
             .map(trip => {
               let {date: tripDate, route, seats, departure_time, price} = trip;
-              let tripStations = route.split(' -> ');
+              let tripStations = route.split(ALFA_BUS_ARROW_TRIP_SPLITTER);
               let tripDirection = getDirection(tripStations);
 
               return {
@@ -158,6 +160,13 @@ const getAllTrips = (direction, date) => {
         let [alfaBusTrips, atlasTrips] = response;
 
         let allTrips = [...alfaBusTrips, ...atlasTrips];
+
+        allTrips.forEach(trip => {
+          let {price} = trip;
+          let priceNumeric = +price;
+
+          trip.price = priceNumeric.toFixed(2)
+        });
 
         allTrips.sort((trip1, trip2) => {
           let {date: date1, departureTime: departureTime1} = trip1;
