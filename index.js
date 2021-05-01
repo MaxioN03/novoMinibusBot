@@ -2,7 +2,7 @@ const {Telegraf} = require('telegraf');
 const {Markup} = Telegraf;
 const moment = require('moment');
 const {getAllTrips} = require('./js/tripsFetcher');
-const {DIRECTIONS, STATIONS, ONE_MINUTE, MAX_VISIBILITY_DAYS} = require(
+const {DIRECTIONS, STATIONS, ONE_MINUTE, MAX_VISIBILITY_DAYS, DAY_OF_WEEK_SHORT_TRANSLATIONS} = require(
     './js/constants');
 const {getMessageWithTrips, isMessageUserAllowed, getDirectionString} = require(
     './js/utils');
@@ -40,7 +40,12 @@ bot.action(DIRECTION_REGEX, (ctx) => {
     let date = currentDay.add(i, 'days');
     let dayString = date.format('DD-MM-YYYY');
     let dowString = date.format('dddd');
-    dates.push(`${dayString} ${dowString}`);
+    let dowLocaleString = dowString.toLowerCase() &&
+    DAY_OF_WEEK_SHORT_TRANSLATIONS &&
+    DAY_OF_WEEK_SHORT_TRANSLATIONS[dowString.toLowerCase()]
+        ? DAY_OF_WEEK_SHORT_TRANSLATIONS[dowString.toLowerCase()]
+        : null;
+    dates.push(`${dayString}${dowLocaleString ? `, ${dowLocaleString}` : ''}`);
   }
   let buttons = dates.reduce((result, date) => {
 

@@ -13,6 +13,16 @@ const STATIONS = {
   MINSK: 'Минск',
 };
 
+const DAY_OF_WEEK_SHORT_TRANSLATIONS = {
+  monday: 'Пн',
+  tuesday: 'Вт',
+  wednesday: 'Ср',
+  thursday: 'Чт',
+  friday: 'Пт',
+  saturday: 'Сб',
+  sunday: 'Вс'
+};
+
 const ONE_SECOND = 1000;
 const ONE_MINUTE = 60 * ONE_SECOND;
 
@@ -24,5 +34,6 @@ module.exports = {
   STATIONS,
   ONE_SECOND,
   ONE_MINUTE,
-  MAX_VISIBILITY_DAYS
+  MAX_VISIBILITY_DAYS,
+  DAY_OF_WEEK_SHORT_TRANSLATIONS
 };
