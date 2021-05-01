@@ -2,9 +2,12 @@ const {Telegraf} = require('telegraf');
 const {Markup} = Telegraf;
 const moment = require('moment');
 const {getAllTrips} = require('./js/tripsFetcher');
-const {DIRECTIONS, STATIONS, ONE_MINUTE, MAX_VISIBILITY_DAYS} = require('./js/constants');
-const {getMessageWithTrips, isMessageUserAllowed, getDirectionString} = require('./js/utils');
-const {TRACK_KEY, DIRECTION_KEY, DIRECTION_REGEX, DATE_KEY} = require('./js/commands');
+const {DIRECTIONS, STATIONS, ONE_MINUTE, MAX_VISIBILITY_DAYS} = require(
+    './js/constants');
+const {getMessageWithTrips, isMessageUserAllowed, getDirectionString} = require(
+    './js/utils');
+const {TRACK_KEY, DIRECTION_KEY, DIRECTION_REGEX, DATE_KEY} = require(
+    './js/commands');
 
 const {Composer} = require('micro-bot');
 const bot = new Composer();
@@ -33,7 +36,11 @@ bot.action(DIRECTION_REGEX, (ctx) => {
 
   let dates = [];
   for (let i = 0; i < MAX_VISIBILITY_DAYS; i++) {
-    dates.push(moment().add(i, 'days').format('DD-MM-YYYY'));
+    let currentDay = moment();
+    let date = currentDay.add(i, 'days');
+    let dayString = date.format('DD-MM-YYYY');
+    let dowString = date.format('dddd');
+    dates.push(`${dayString} ${dowString}`);
   }
   let buttons = dates.reduce((result, date) => {
 
