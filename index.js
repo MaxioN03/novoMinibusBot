@@ -77,12 +77,12 @@ bot.action(DIRECTION_REGEX, (ctx) => {
 });
 
 const sendTripsInfo = (ctx) => {
-  getAllTrips(direction, date).then(response => {
+  getAllTrips(direction, date).then(trips => {
 
     let message = `${getDirectionString(direction, true)}\n`
         + `*Дата*: ${date}\n\n`;
 
-    message += getMessageWithTrips(response);
+    message += trips.length ? getMessageWithTrips(trips) : '_Мест не найдено_';
 
     ctx.replyWithMarkdown(message);
   });
