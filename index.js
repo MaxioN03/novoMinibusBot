@@ -13,8 +13,8 @@ const {Composer} = require('micro-bot');
 const bot = new Composer();
 
 let timer = null;
-let direction = null;
-let date = null;
+let directionsArray = [];
+let datesArray = [];
 let lastTripsResult = null; //last result for diff search
 
 bot.command(TRACK_KEY, (ctx) => {
@@ -89,8 +89,8 @@ bot.action(DIRECTION_REGEX, (ctx) => {
   }, []);
   const inlineMessageDateKeyboard = Markup.inlineKeyboard(buttons).extra();
 
-  direction = selectedDirection;
-  ctx.editMessageText(getDirectionString(direction, false));
+  directionsArray.push(selectedDirection);
+  ctx.editMessageText(getDirectionString(selectedDirection, false));
 
   ctx.reply(
       'Укажите дату',
@@ -98,28 +98,39 @@ bot.action(DIRECTION_REGEX, (ctx) => {
 });
 
 const sendTripsInfo = (ctx, isDiffSearch) => {
-  getAllTrips(direction, date).then(trips => {
-    let message = `${getDirectionString(direction, true)}\n`
-        + `*Дата*: ${date}\n\n`;
 
-    message += trips.length
-        ? getMessageWithTrips(trips)
-        : '_Мест не найдено_';
-
-    if (isDiffSearch) {
-      let isTripsEqual = isTripsResultEqual(lastTripsResult, trips);
-
-      if (lastTripsResult === null || !isTripsEqual) {
-        ctx.replyWithMarkdown(message);
-      }
-    }
-    else {
-      ctx.replyWithMarkdown(message);
-    }
-
-    lastTripsResult = trips;
-
+  let queries = directionsArray.map((direction,index) => {
+    return getAllTrips(direction, datesArray[index]);
   });
+
+  Promise.all(queries)
+      .then(tripsArray => {
+
+        let message = '';
+
+        tripsArray.forEach((trips, index) => {
+          message += `${getDirectionString(directionsArray[index], true)}\n`
+              + `*Дата*: ${datesArray[index]}\n\n`;
+
+          message += trips.length
+              ? getMessageWithTrips(trips)
+              : '_Мест не найдено_\n\n';
+        });
+
+
+        if (isDiffSearch) {
+          let isTripsEqual = isTripsResultEqual(lastTripsResult, tripsArray);
+
+          if (lastTripsResult === null || !isTripsEqual) {
+            ctx.replyWithMarkdown(message);
+          }
+        }
+        else {
+          ctx.replyWithMarkdown(message);
+        }
+
+        lastTripsResult = tripsArray;
+      });
 };
 
 bot.action(/date_\d{2}.\d{2}.\d{4}.*/ig, (ctx) => {
@@ -128,7 +139,7 @@ bot.action(/date_\d{2}.\d{2}.\d{4}.*/ig, (ctx) => {
   let dateFull = splittedAction[1];
   let selectedAction = splittedAction[2];
 
-  date = dateFull.split(',')[0];
+  datesArray.push(dateFull.split(',')[0]);
   ctx.editMessageText(`Дата: ${dateFull}`);
 
   switch (selectedAction) {
@@ -152,6 +163,9 @@ bot.action(/date_\d{2}.\d{2}.\d{4}.*/ig, (ctx) => {
 
 bot.command('stop', (ctx) => {
   if (isMessageUserAllowed(ctx)) {
+    directionsArray = [];
+    datesArray = [];
+    lastTripsResult = null;
     clearInterval(timer);
   }
 });

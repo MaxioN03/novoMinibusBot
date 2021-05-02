@@ -77,6 +77,7 @@ const getDirectionString = (direction, withMarkdown) => {
       : `${STATIONS.MINSK} → ${STATIONS.NOVO}`}`;
 };
 
+//tripsResult: trip[][]
 const isTripsResultEqual = (tripsResult1, tripsResult2) => {
 
   if ((tripsResult1 === null && tripsResult2 !== null) ||
@@ -89,10 +90,22 @@ const isTripsResultEqual = (tripsResult1, tripsResult2) => {
   }
 
   if (Array.isArray(tripsResult1)) {
+    let reducedTripsResult1 = tripsResult1 && tripsResult1.reduce(
+        (result, tripsResult1Item) => {
+          result.push(...tripsResult1Item);
+          return result;
+        }, []) || [];
 
-    return tripsResult1.every((tripsResult1Item, index) => {
-      let {departureTime: departureTime1, freeSeats: freeSeats1, price: price1} = tripsResult1Item;
-      let {departureTime: departureTime2, freeSeats: freeSeats2, price: price2} = tripsResult2[index] || {};
+    let reducedTripsResult2 = tripsResult2 && tripsResult2.reduce(
+        (result, tripsResult2Item) => {
+          result.push(...tripsResult2Item);
+          return result;
+        }, []) || [];
+
+    return reducedTripsResult1.every((tripsResult1Item, index) => {
+      let {departureTime: departureTime1, freeSeats: freeSeats1, price: price1} = tripsResult1Item || {};
+      let {departureTime: departureTime2, freeSeats: freeSeats2, price: price2} = reducedTripsResult2[index] ||
+      {};
 
       return departureTime1 === departureTime2
           && freeSeats1 === freeSeats2
@@ -100,9 +113,22 @@ const isTripsResultEqual = (tripsResult1, tripsResult2) => {
     });
 
   } else if (Array.isArray(tripsResult2)) {
-    return tripsResult2.every((tripsResult2Item, index) => {
-      let {departureTime: departureTime1, freeSeats: freeSeats1, price: price1} = tripsResult1[index] || {};
-      let {departureTime: departureTime2, freeSeats: freeSeats2, price: price2} = tripsResult2Item;
+    let reducedTripsResult1 = tripsResult1 && tripsResult1.reduce(
+        (result, tripsResult1Item) => {
+          result.push(...tripsResult1Item);
+          return result;
+        }, []) || [];
+
+    let reducedTripsResult2 = tripsResult2 && tripsResult2.reduce(
+        (result, tripsResult2Item) => {
+          result.push(...tripsResult2Item);
+          return result;
+        }, []) || [];
+
+    return reducedTripsResult2.every((tripsResult2Item, index) => {
+      let {departureTime: departureTime1, freeSeats: freeSeats1, price: price1} = reducedTripsResult1[index] ||
+      {};
+      let {departureTime: departureTime2, freeSeats: freeSeats2, price: price2} = tripsResult2Item || {};
 
       return departureTime1 === departureTime2
           && freeSeats1 === freeSeats2
