@@ -154,9 +154,8 @@ bot.action(/date_\d{2}.\d{2}.\d{4}.*/ig, (ctx) => {
       sendTripsInfo(ctx, true);
 
       timer = setInterval(() => {
-        console.log('Go!', +(new Date()));
         sendTripsInfo(ctx, true);
-      }, 1000 * 10);
+      }, ONE_MINUTE);
       break;
   }
 });
