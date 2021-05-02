@@ -77,9 +77,44 @@ const getDirectionString = (direction, withMarkdown) => {
       : `${STATIONS.MINSK} → ${STATIONS.NOVO}`}`;
 };
 
+const isTripsResultEqual = (tripsResult1, tripsResult2) => {
+
+  if ((tripsResult1 === null && tripsResult2 !== null) ||
+      (tripsResult1 !== null && tripsResult2 === null)) {
+    return false;
+  }
+
+  if (tripsResult1.length !== tripsResult2.length) {
+    return false;
+  }
+
+  if (Array.isArray(tripsResult1)) {
+
+    return tripsResult1.every((tripsResult1Item, index) => {
+      let {departureTime: departureTime1, freeSeats: freeSeats1, price: price1} = tripsResult1Item;
+      let {departureTime: departureTime2, freeSeats: freeSeats2, price: price2} = tripsResult2[index] || {};
+
+      return departureTime1 === departureTime2
+          && freeSeats1 === freeSeats2
+          && price1 === price2;
+    });
+
+  } else if (Array.isArray(tripsResult2)) {
+    return tripsResult2.every((tripsResult2Item, index) => {
+      let {departureTime: departureTime1, freeSeats: freeSeats1, price: price1} = tripsResult1[index] || {};
+      let {departureTime: departureTime2, freeSeats: freeSeats2, price: price2} = tripsResult2Item;
+
+      return departureTime1 === departureTime2
+          && freeSeats1 === freeSeats2
+          && price1 === price2;
+    });
+  }
+};
+
 module.exports = {
   getDirection,
   getMessageWithTrips,
   isMessageUserAllowed,
   getDirectionString,
+  isTripsResultEqual,
 };

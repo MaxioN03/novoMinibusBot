@@ -4,9 +4,9 @@ const moment = require('moment');
 const {getAllTrips} = require('./js/tripsFetcher');
 const {DIRECTIONS, STATIONS, ONE_MINUTE, MAX_VISIBILITY_DAYS, DAY_OF_WEEK_SHORT_TRANSLATIONS} = require(
     './js/constants');
-const {getMessageWithTrips, isMessageUserAllowed, getDirectionString} = require(
+const {getMessageWithTrips, isMessageUserAllowed, getDirectionString, isTripsResultEqual} = require(
     './js/utils');
-const {TRACK_KEY, DIRECTION_KEY, DIRECTION_REGEX, DATE_KEY} = require(
+const {TRACK_KEY, TRACK_DIFF_KEY, DIRECTION_KEY, DIRECTION_REGEX, DATE_KEY} = require(
     './js/commands');
 
 const {Composer} = require('micro-bot');
@@ -15,14 +15,30 @@ const bot = new Composer();
 let timer = null;
 let direction = null;
 let date = null;
+let lastTripsResult = null; //last result for diff search
 
 bot.command(TRACK_KEY, (ctx) => {
   if (isMessageUserAllowed(ctx)) {
     const inlineMessageDirectionsKeyboard = Markup.inlineKeyboard([
       Markup.callbackButton(`${STATIONS.MINSK} → ${STATIONS.NOVO}`,
-          `${DIRECTION_KEY}_${DIRECTIONS.toNovogrudok}`),
+          `${DIRECTION_KEY}_${DIRECTIONS.toNovogrudok}_${TRACK_KEY}`),
       Markup.callbackButton(`${STATIONS.NOVO} → ${STATIONS.MINSK}`,
-          `${DIRECTION_KEY}_${DIRECTIONS.toMinsk}`),
+          `${DIRECTION_KEY}_${DIRECTIONS.toMinsk}_${TRACK_KEY}`),
+    ]).extra();
+
+    ctx.reply(
+        'Укажите направление',
+        inlineMessageDirectionsKeyboard);
+  }
+});
+
+bot.command(TRACK_DIFF_KEY, (ctx) => {
+  if (isMessageUserAllowed(ctx)) {
+    const inlineMessageDirectionsKeyboard = Markup.inlineKeyboard([
+      Markup.callbackButton(`${STATIONS.MINSK} → ${STATIONS.NOVO}`,
+          `${DIRECTION_KEY}_${DIRECTIONS.toNovogrudok}_${TRACK_DIFF_KEY}`),
+      Markup.callbackButton(`${STATIONS.NOVO} → ${STATIONS.MINSK}`,
+          `${DIRECTION_KEY}_${DIRECTIONS.toMinsk}_${TRACK_DIFF_KEY}`),
     ]).extra();
 
     ctx.reply(
@@ -32,7 +48,9 @@ bot.command(TRACK_KEY, (ctx) => {
 });
 
 bot.action(DIRECTION_REGEX, (ctx) => {
-  let selectedDirection = ctx.match.input.split('_')[1];
+  let splittedAction = ctx.match.input.split('_');
+  let selectedDirection = splittedAction[1];
+  let selectedAction = splittedAction[2];
 
   let dates = [];
   for (let i = 0; i < MAX_VISIBILITY_DAYS; i++) {
@@ -45,11 +63,14 @@ bot.action(DIRECTION_REGEX, (ctx) => {
     DAY_OF_WEEK_SHORT_TRANSLATIONS[dowString.toLowerCase()]
         ? DAY_OF_WEEK_SHORT_TRANSLATIONS[dowString.toLowerCase()]
         : null;
-    dates.push(`${dayString}${dowLocaleString ? `, ${dowLocaleString}` : ''}`);
+    dates.push(`${dayString}${dowLocaleString
+        ? `, ${dowLocaleString}`
+        : ''}`);
   }
   let buttons = dates.reduce((result, date) => {
 
-    let button = Markup.callbackButton(date, `${DATE_KEY}_${date}`);
+    let button = Markup.callbackButton(date,
+        `${DATE_KEY}_${date}_${selectedAction}`);
 
     if (result.length === 0) {
       result.push([button]);
@@ -76,28 +97,57 @@ bot.action(DIRECTION_REGEX, (ctx) => {
       inlineMessageDateKeyboard);
 });
 
-const sendTripsInfo = (ctx) => {
+const sendTripsInfo = (ctx, isDiffSearch) => {
   getAllTrips(direction, date).then(trips => {
-
     let message = `${getDirectionString(direction, true)}\n`
         + `*Дата*: ${date}\n\n`;
 
-    message += trips.length ? getMessageWithTrips(trips) : '_Мест не найдено_';
+    message += trips.length
+        ? getMessageWithTrips(trips)
+        : '_Мест не найдено_';
 
-    ctx.replyWithMarkdown(message);
+    if (isDiffSearch) {
+      let isTripsEqual = isTripsResultEqual(lastTripsResult, trips);
+
+      if (lastTripsResult === null || !isTripsEqual) {
+        ctx.replyWithMarkdown(message);
+      }
+    }
+    else {
+      ctx.replyWithMarkdown(message);
+    }
+
+    lastTripsResult = trips;
+
   });
 };
 
-bot.action(/date_\d{2}.\d{2}.\d{4}/ig, (ctx) => {
-  date = ctx.match[0].split('_')[1];
-  ctx.editMessageText(`Дата: ${date}`);
-  ctx.reply('Начинаю отслеживание...');
+bot.action(/date_\d{2}.\d{2}.\d{4}.*/ig, (ctx) => {
 
-  sendTripsInfo(ctx);
+  let splittedAction = ctx.match[0].split('_');
+  let dateFull = splittedAction[1];
+  let selectedAction = splittedAction[2];
 
-  timer = setInterval(() => {
-    sendTripsInfo(ctx);
-  }, ONE_MINUTE);
+  date = dateFull.split(',')[0];
+  ctx.editMessageText(`Дата: ${dateFull}`);
+
+  switch (selectedAction) {
+    case TRACK_KEY:
+      sendTripsInfo(ctx);
+
+      timer = setInterval(() => {
+        sendTripsInfo(ctx);
+      }, ONE_MINUTE);
+      break;
+    case TRACK_DIFF_KEY:
+      sendTripsInfo(ctx, true);
+
+      timer = setInterval(() => {
+        console.log('Go!', +(new Date()));
+        sendTripsInfo(ctx, true);
+      }, 1000 * 10);
+      break;
+  }
 });
 
 bot.command('stop', (ctx) => {
