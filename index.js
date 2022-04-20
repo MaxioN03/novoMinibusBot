@@ -103,6 +103,7 @@ const sendTripsInfo = (ctx, isDiffSearch) => {
     return getAllTrips(direction, datesArray[index]);
   });
 
+
   Promise.all(queries)
       .then(tripsArray => {
 
