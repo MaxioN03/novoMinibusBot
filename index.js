@@ -148,14 +148,14 @@ bot.action(/date_\d{2}.\d{2}.\d{4}.*/ig, (ctx) => {
 
       timer = setInterval(() => {
         sendTripsInfo(ctx);
-      }, ONE_MINUTE);
+      }, 5000);
       break;
     case TRACK_DIFF_KEY:
       sendTripsInfo(ctx, true);
 
       timer = setInterval(() => {
         sendTripsInfo(ctx, true);
-      }, ONE_MINUTE);
+      }, 5000);
       break;
   }
 });
