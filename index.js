@@ -99,7 +99,7 @@ bot.action(DIRECTION_REGEX, (ctx) => {
 
 const sendTripsInfo = (ctx, isDiffSearch) => {
 
-  let queries = directionsArray.map((direction,index) => {
+  let queries = directionsArray.filter((_, index) => datesArray[index]).map((direction,index) => {
     return getAllTrips(direction, datesArray[index]);
   });
 
