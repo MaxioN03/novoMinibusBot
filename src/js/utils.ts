@@ -1,11 +1,8 @@
-const {AGENTS, DIRECTIONS, STATIONS} = require('./constants');
-
-const ALLOWED_USERS = process.env.ALLOWED_USERS &&
-    process.env.ALLOWED_USERS.split(';') || [];
+import {AGENTS, DIRECTIONS, STATIONS} from "./constants";
 
 //stations: [string, string]
-const getDirection = (stations) => {
-  let formattedStations = stations.map(station => station.trim().toLowerCase());
+export const getDirection = (stations: any) => {
+  let formattedStations = stations.map((station: any) => station.trim().toLowerCase());
   if (formattedStations[0] === STATIONS.NOVO.toLowerCase() &&
       formattedStations[1] === STATIONS.MINSK.toLowerCase()) {
     return DIRECTIONS.toMinsk;
@@ -18,8 +15,8 @@ const getDirection = (stations) => {
   return null;
 };
 
-const getMessageWithTrips = (trips) => {
-  const getSeatsString = (seatsCount) => {
+export const getMessageWithTrips = (trips: any[]) => {
+  const getSeatsString = (seatsCount: any) => {
     let end = '';
     if (seatsCount === 1) {
       end = 'место';
@@ -32,7 +29,7 @@ const getMessageWithTrips = (trips) => {
     return `${seatsCount} ${end}`;
   };
 
-  const getAgentString = (agent) => {
+  const getAgentString = (agent: any) => {
     if (agent === AGENTS.alfa) {
       return `[${agent}](https://alfa-bus.by/)`;
     }
@@ -61,15 +58,8 @@ const getMessageWithTrips = (trips) => {
   }, '');
 };
 
-const isMessageUserAllowed = (ctx) => {
-  let user = ctx && ctx.update && ctx.update.message && ctx.update.message.from
-      && ctx.update.message.from.username || null;
-
-  return user && ALLOWED_USERS.includes(user);
-};
-
 //direction: DIRECTIONS, withMarkdown: boolean
-const getDirectionString = (direction, withMarkdown) => {
+export const getDirectionString = (direction: any, withMarkdown: any) => {
   return `${withMarkdown
       ? '*Направление*'
       : 'Направление'}: ${direction === DIRECTIONS.toMinsk
@@ -78,7 +68,7 @@ const getDirectionString = (direction, withMarkdown) => {
 };
 
 //tripsResult: trip[][]
-const isTripsResultEqual = (tripsResult1, tripsResult2) => {
+export const isTripsResultEqual = (tripsResult1: any, tripsResult2: any) => {
 
   if ((tripsResult1 === null && tripsResult2 !== null) ||
       (tripsResult1 !== null && tripsResult2 === null)) {
@@ -97,14 +87,22 @@ const isTripsResultEqual = (tripsResult1, tripsResult2) => {
         }, []) || [];
 
     let reducedTripsResult2 = tripsResult2 && tripsResult2.reduce(
-        (result, tripsResult2Item) => {
+        (result: any, tripsResult2Item: any) => {
           result.push(...tripsResult2Item);
           return result;
         }, []) || [];
 
-    return reducedTripsResult1.every((tripsResult1Item, index) => {
-      let {departureTime: departureTime1, freeSeats: freeSeats1, price: price1} = tripsResult1Item || {};
-      let {departureTime: departureTime2, freeSeats: freeSeats2, price: price2} = reducedTripsResult2[index] ||
+    return reducedTripsResult1.every((tripsResult1Item: any, index: number) => {
+      let {
+        departureTime: departureTime1,
+        freeSeats: freeSeats1,
+        price: price1,
+      } = tripsResult1Item || {};
+      let {
+        departureTime: departureTime2,
+        freeSeats: freeSeats2,
+        price: price2,
+      } = reducedTripsResult2[index] ||
       {};
 
       return departureTime1 === departureTime2
@@ -114,7 +112,7 @@ const isTripsResultEqual = (tripsResult1, tripsResult2) => {
 
   } else if (Array.isArray(tripsResult2)) {
     let reducedTripsResult1 = tripsResult1 && tripsResult1.reduce(
-        (result, tripsResult1Item) => {
+        (result: any, tripsResult1Item: any) => {
           result.push(...tripsResult1Item);
           return result;
         }, []) || [];
@@ -125,10 +123,18 @@ const isTripsResultEqual = (tripsResult1, tripsResult2) => {
           return result;
         }, []) || [];
 
-    return reducedTripsResult2.every((tripsResult2Item, index) => {
-      let {departureTime: departureTime1, freeSeats: freeSeats1, price: price1} = reducedTripsResult1[index] ||
+    return reducedTripsResult2.every((tripsResult2Item: any, index: any) => {
+      let {
+        departureTime: departureTime1,
+        freeSeats: freeSeats1,
+        price: price1,
+      } = reducedTripsResult1[index] ||
       {};
-      let {departureTime: departureTime2, freeSeats: freeSeats2, price: price2} = tripsResult2Item || {};
+      let {
+        departureTime: departureTime2,
+        freeSeats: freeSeats2,
+        price: price2,
+      } = tripsResult2Item || {};
 
       return departureTime1 === departureTime2
           && freeSeats1 === freeSeats2
@@ -137,10 +143,7 @@ const isTripsResultEqual = (tripsResult1, tripsResult2) => {
   }
 };
 
-module.exports = {
-  getDirection,
-  getMessageWithTrips,
-  isMessageUserAllowed,
-  getDirectionString,
-  isTripsResultEqual,
+export const getChatId = async (ctx: any) => {
+  let {id} = await ctx.getChat();
+  return id;
 };
